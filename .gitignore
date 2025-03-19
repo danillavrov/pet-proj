@@ -1,6 +1,11 @@
-.venv
-__pycache__
-.idea
-.dockerignore
-.env
-requirements.txt
+authAPI/.venv
+authAPI/__pycache__
+authAPI/.idea
+authAPI/.dockerignore
+authAPI/.env
+authAPI/requirements.txt
+.git
+testAPI/.venv
+testAPI/__pycache__
+testAPI/.idea
+

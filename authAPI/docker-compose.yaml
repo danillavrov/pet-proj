@@ -14,11 +14,11 @@ services:
       DATABASE_USER: ${DATABASE_USER}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
     ports:
-      - "8000:8000"
+      - "8008:8008"
     depends_on:
       db1:
         condition: service_healthy
-    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    command: uvicorn main:app --host 0.0.0.0 --port 8008
 
   db1:
     image: postgres:13

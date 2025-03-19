@@ -29,5 +29,6 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     password = Column(String, index=True)
-Base.metadata.drop_all(engine)
+
+
 Base.metadata.create_all(engine)
