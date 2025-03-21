@@ -8,4 +8,7 @@ authAPI/requirements.txt
 testAPI/.venv
 testAPI/__pycache__
 testAPI/.idea
-
+taskAPI/.venv
+taskAPI/__pycache__
+taskAPI/.idea
+pet-site/node_modules
