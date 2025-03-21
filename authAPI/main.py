@@ -11,6 +11,16 @@ app = FastAPI()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://0.0.0.0:8080"],  # Разрешённые источники (замени на свой фронтенд)
+    allow_credentials=True,  # Разрешаем отправку куков
+    allow_methods=["*"],  # Разрешаем все HTTP-методы (POST, GET, OPTIONS и т. д.)
+    allow_headers=["*"],  # Разрешаем все заголовки
+)
+
 config = AuthXConfig()
 config.JWT_SECRET_KEY = "SECRET_KEY"
 config.JWT_ACCESS_COOKIE_NAME = "my_access_token"
@@ -24,6 +34,8 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
 @app.post("/reg")
 def register(user: UserSchema, db: Session = Depends(get_db)):
     new_user = User(name=user.name, password=user.password)
@@ -41,13 +53,15 @@ def login(creds: UserSchema, response: Response, db: Session = Depends(get_db)):
         token = security.create_access_token(uid="12345")
 
         response.set_cookie(
-            key=config.JWT_ACCESS_COOKIE_NAME,
-            value=token,
+            key="my_access_token",
+            value="my_access_token",
+            httponly=True,
             secure=True,
-            samesite="none"  # Разрешает кросс-доменные куки
+            samesite="none",
+            path="/"
         )
 
-        return {"access_token": token}
+        return {"access_token": token, "message": "success"}
     raise HTTPException(status_code=401, detail="Incorrect password")
 
 
