@@ -1,35 +1,35 @@
-from sqlalchemy import Column, Integer, String, create_engine
+from typing import AsyncGenerator
+
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncAttrs
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 
-
-# Чтение переменных из окружения
 DATABASE_HOST = os.getenv("DATABASE_HOST")
 DATABASE_PORT = os.getenv("DATABASE_PORT")
 DATABASE_NAME = os.getenv("DATABASE_NAME")
 DATABASE_USER = os.getenv("DATABASE_USER")
 DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
 
-# Формирование строки подключения
-DATABASE_URL = f"postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
+DATABASE_URL = f"postgresql+asyncpg://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
 
-# Создание синхронного движка SQLAlchemy
-engine = create_engine(DATABASE_URL)
+engine = create_async_engine(DATABASE_URL)
+async_session_maker = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
-# Создание фабрики сессий
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Базовый класс для моделей
+async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
+    async with async_session_maker() as session:
+        yield session
+
+
 Base = declarative_base()
 
-class Task(Base):
+
+class Task(Base, AsyncAttrs):
     __tablename__ = "tasks"
 
     id = Column(Integer, primary_key=True, index=True)
-    user = Column(String, index=True)
-    name = Column(String, index=True)
+    user = Column(Integer, index=True)
+    title = Column(String, index=True)
     description = Column(String, index=True)
-
-
-Base.metadata.create_all(engine)

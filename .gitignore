@@ -12,3 +12,16 @@ taskAPI/.venv
 taskAPI/__pycache__
 taskAPI/.idea
 pet-site/node_modules
+pet-site/.idea
+cert.pem
+key.pem
+pet-site/certificate.crt
+pet-site/private.key
+testAPI/cert.pem
+testAPI/key.pem
+authAPI/cert.pem
+authAPI/key.pem
+.idea
+taskAPI/.env
+testAPI
+
