@@ -54,11 +54,7 @@ async def main():
                         body = message.body.decode()
                         logging.info(f" [x] Received message: '{body}'")
 
-                        db: AsyncSession = get_async_session()
-                        try:
-                            query = await db.execute(select(user_stat).where(user_stat.user == body["user"]))
-                        except Exception as e:
-                            logging.error(e)
+                       
 
 
 
