@@ -24,4 +24,10 @@ authAPI/key.pem
 .idea
 taskAPI/.env
 testAPI
+analysis_service/.venv
+analysis_service/__pycache__
+analysis_service/.idea
+analysis_service/.env
+analysis_service/requirements.txt
+
 

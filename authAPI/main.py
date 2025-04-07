@@ -1,16 +1,34 @@
+import json
+from contextlib import asynccontextmanager
+import aio_pika
 import jwt
-from fastapi import FastAPI, HTTPException, Depends, Request, Response, requests, Header
-from authx import AuthX, AuthXConfig
+from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.security import OAuth2PasswordBearer
-from jwt import PyJWTError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 from models import get_async_session, User
 from schemas import UserSchema
 from proj_pack import verify_jwt_from_header
 from sqlalchemy.future import select
 
-app = FastAPI()
+RABBITMQ_URL = "amqp://guest:guest@rabbitmq:5672/"
+QUEUE_NAME = "user_events"
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+
+    connection = await aio_pika.connect_robust(RABBITMQ_URL)
+    channel = await connection.channel()
+    await channel.declare_queue(QUEUE_NAME, durable=True)
+
+
+    app.state.rabbit_connection = connection
+    app.state.rabbit_channel = channel
+
+    yield
+
+    await connection.close()
+
+app = FastAPI(lifespan=lifespan)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -31,11 +49,20 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 @app.post("/reg")
-async def register(user: UserSchema, db: AsyncSession = Depends(get_async_session)):
+async def register(request: Request, user: UserSchema, db: AsyncSession = Depends(get_async_session)):
     new_user = User(name=user.name, password=user.password)
     db.add(new_user)
     await db.commit()
     await db.refresh(new_user)
+    channel: aio_pika.Channel = request.app.state.rabbit_channel
+    payload = {'user': new_user.id}
+    await channel.default_exchange.publish(
+        aio_pika.Message(
+            body=json.dumps(payload).encode(),
+            delivery_mode=aio_pika.DeliveryMode.PERSISTENT
+        ),
+        routing_key=QUEUE_NAME
+    )
     return {"message": "User registered successfully"}
 
 
