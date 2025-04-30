@@ -6,7 +6,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 
-# Чтение переменных из окружения
 DATABASE_HOST = os.getenv("DATABASE_HOST")
 DATABASE_PORT = os.getenv("DATABASE_PORT")
 DATABASE_NAME = os.getenv("DATABASE_NAME")
@@ -27,9 +26,9 @@ async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
 Base = declarative_base()
 
 
-class User(Base, AsyncAttrs):
-    __tablename__ = "users"
-
+class user_stat(Base, AsyncAttrs):
+    __tablename__ = "tasks"
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-    password = Column(String, index=True)
+    task_completed = Column(Integer, index=True)
+    task_failed = Column(Integer, index=True)
+    task_processed = Column(Integer, index=True)

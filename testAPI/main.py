@@ -1,27 +1,22 @@
+import jwt
 from authx import AuthXConfig, AuthX
-import requests
-from fastapi import FastAPI, Request, HTTPException, Depends
 
+from fastapi import FastAPI, Request, HTTPException, Depends, Header
+from fastapi.middleware.cors import CORSMiddleware
+from jwt import PyJWTError
+from proj_pack import verify_jwt_from_header
 app = FastAPI()
 
-AUTH_SERVICE_URL="http://0.0.0.0:8008/verify"
-config = AuthXConfig()
-config.JWT_SECRET_KEY = "SECRET_KEY"
-config.JWT_ACCESS_COOKIE_NAME = "my_access_token"
-config.JWT_TOKEN_LOCATION = ["cookies"]
-security = AuthX(config=config)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://0.0.0.0:8080"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+ALGORITHM = "HS256"
+SECRET_KEY = 'super_secret_key'
 
-
-def verify_jwt_from_cookie(request: Request):
-    token = request.cookies.get("my_access_token")
-    if not token:
-        raise HTTPException(status_code=401, detail="Missing token")
-    response = requests.post(AUTH_SERVICE_URL, json={"token": token})
-    if response.status_code == 200:
-        return response.json()["user"]
-
-    raise HTTPException(status_code=401, detail="Invalid or expired token")
-
-@app.get("/protected", dependencies=[Depends(verify_jwt_from_cookie)])
-def protected_example():
-    return {"data": "data"}
+@app.get("/protected")
+async def protected_route(user_data: dict = Depends(verify_jwt_from_header)):
+    return {"message": "Access granted", "user": user_data}

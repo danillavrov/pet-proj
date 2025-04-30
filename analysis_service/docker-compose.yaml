@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   app:
-    container_name: "authAPI"
+    container_name: "analysis_api"
     image: img
     build:
       context: .
@@ -14,26 +14,35 @@ services:
       DATABASE_USER: ${DATABASE_USER}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
     ports:
-      - "8008:8008"
+      - "8088:8088"
     depends_on:
-      db_auth:
+      db_stats:
         condition: service_healthy
     networks:
       - my_network
+  consumer:
+      build:
+        context: .
+        dockerfile: DockerfileCons
+      command: python consumer.py
+      networks:
+        - my_network
 
-  db_auth:
+  db_stats:
     image: postgres:13
     environment:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_PORT: ${DATABASE_PORT}
     ports:
-      - "5432:5432"
+      - "5434:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d auth-api-db -U user"]
-      interval: 5s
-      timeout: 5s
+      test: ["CMD-SHELL", "pg_isready -d stats-db -U user"]
+      interval: 3s
+      timeout: 3s
       retries: 5
+
 networks:
   my_network:
     external: true

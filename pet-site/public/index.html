@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+    <h2>Login</h2>
+    <form id="loginForm">
+        <label>Username:</label>
+        <input type="text" id="name" required>
+        <br>
+        <label>Password:</label>
+        <input type="password" id="password" required>
+        <br>
+        <button type="submit">Login</button>
+    </form>
+
+    <h3>Protected Data</h3>
+    <button id="getData">Check auth</button>
+    <div id="taskForm" style="display: block;">
+        <h3>Create Task</h3>
+        <label>Title:</label>
+        <input type="text" id="taskTitle" required>
+        <br>
+        <label>Description:</label>
+        <input type="text" id="taskDescription" required>
+        <br>
+        <button id="addTask">Add Task</button>
+        <button id="checkTasks">Check Tasks</button>
+    </div>
+    <p id="response"></p>
+
+    <script>
+        const API_AUTH = "http://0.0.0.0:8008";
+        const API_TASK = "http://0.0.0.0:8000";
+
+        document.getElementById("loginForm").addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const name = document.getElementById("name").value;
+            const password = document.getElementById("password").value;
+
+            const response = await fetch(`${API_AUTH}/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, password })
+            });
+
+            const data = await response.json();
+            localStorage.setItem("access_token", data.access_token);
+            alert(data.message || "Login failed");
+        });
+
+
+        document.getElementById("addTask").addEventListener("click", async () => {
+            const token = localStorage.getItem("access_token");
+            const title = document.getElementById("taskTitle").value;
+            const description = document.getElementById("taskDescription").value;
+
+            const response = await fetch(`${API_TASK}/add_task`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ title, description })
+            });
+
+            const data = await response.json();
+            alert(data.message || "Task added successfully");
+        });
+
+        document.getElementById("checkTasks").addEventListener("click", async () => {
+            const token = localStorage.getItem("access_token");
+            const response = await fetch(`${API_TASK}/get_task`, {
+                method: "GET",
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+
+            const data = await response.json();
+            document.getElementById("response").innerText = JSON.stringify(data, null, 2);
+        });
+    </script>
+</body>
+</html>

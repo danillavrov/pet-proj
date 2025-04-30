@@ -8,4 +8,26 @@ authAPI/requirements.txt
 testAPI/.venv
 testAPI/__pycache__
 testAPI/.idea
+taskAPI/.venv
+taskAPI/__pycache__
+taskAPI/.idea
+pet-site/node_modules
+pet-site/.idea
+cert.pem
+key.pem
+pet-site/certificate.crt
+pet-site/private.key
+testAPI/cert.pem
+testAPI/key.pem
+authAPI/cert.pem
+authAPI/key.pem
+.idea
+taskAPI/.env
+testAPI
+analysis_service/.venv
+analysis_service/__pycache__
+analysis_service/.idea
+analysis_service/.env
+analysis_service/requirements.txt
+
 
